@@ -27,6 +27,11 @@ export const parseGlobalArgs = (argv: string[]) =>
       "browser-executable": {
         type: "string",
       },
+      // TUI 显式 opt-in：允许读取 Workspace Hook Trust store 并执行已授权的
+      // workspace Hook。默认关闭，保持对未授权 workspace Hook 的硬阻断。
+      "trust-workspace-hooks": {
+        type: "boolean",
+      },
       prompt: {
         short: "p",
         type: "string",

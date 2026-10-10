@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { resolve } from "node:path";
 import { createDefaultFileWorkspaceHookTrustStore } from "@zcode/adapters/storage";
 import { getDefaultConfigPath } from "@zcode/adapters/config";
@@ -263,12 +264,27 @@ async function readUserHooks(path: string): Promise<WorkspaceHooksConfig | undef
 }
 
 function normalizeTarget(input: WorkspaceHookTrustCliTarget) {
-  const workspacePath = resolve(input.workspacePath);
+  // Bug 修复：workspaceIdentity 必须与运行时（TUI/协议宿主）派生的快照身份一致，
+  // 否则 grant 写入的 Trust 记录在运行时永远匹配不上（表现为所有 Hook 恒为
+  // pending_trust）。运行时身份来自 process.cwd()（Node 返回物理路径，macOS 上
+  // 是 /private/var/...），而外部调用方（如编排器）传入的 --workspace 通常是
+  // 逻辑路径（/var/...）。这里统一 canonical 化为物理路径，保证两侧一致。
+  const workspacePath = canonicalizeWorkspacePath(resolve(input.workspacePath));
   return {
     workspacePath,
     workspaceIdentity: input.workspaceIdentity?.trim() || workspacePath,
     ...(input.userConfigPath ? { userConfigPath: input.userConfigPath } : {}),
   };
+}
+
+function canonicalizeWorkspacePath(path: string): string {
+  // realpath 失败（目录不存在等）时退回 resolve 结果：grant/revoke 的后续流程
+  // 会自然报错，不需要在此处制造新的失败面。
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
 }
 
 function formatCommand(entry: WorkspaceHookBundleSnapshot["hooks"][number]): string {

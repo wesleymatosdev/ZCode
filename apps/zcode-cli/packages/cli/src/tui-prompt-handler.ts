@@ -62,6 +62,7 @@ export function createTuiSubmitPrompt(
   browserUse?: GlobalOptions["browserUse"],
   browserExecutable?: GlobalOptions["browserExecutable"],
   workflowMode: DynamicWorkflowMode = DEFAULT_CLI_WORKFLOW_MODE,
+  workspaceHookTrustEnabled = false,
 ): TuiPromptHandler {
   let app: Awaited<ReturnType<NonNullable<RunDependencies["createZCodeApp"]>>> | undefined;
   let activeUiLocale = uiLocale;
@@ -155,6 +156,9 @@ export function createTuiSubmitPrompt(
         ...(providerEndpointRoutingPort ? { providerEndpointRoutingPort } : {}),
         providerRegistry: providerRegistryRuntime.runtime.registryService,
         configuredDefaultModelSelection,
+        // 只在 --trust-workspace-hooks 显式传入时开启；默认保持硬阻断
+        // （不读取 Trust store，workspace Hook 一律 pending_trust）。
+        workspaceHookTrustEnabled,
         ...(providerRegistryRuntime.providerRuntimeHeadersPort
           ? {
               providerRuntimeHeadersPort: providerRegistryRuntime.providerRuntimeHeadersPort,

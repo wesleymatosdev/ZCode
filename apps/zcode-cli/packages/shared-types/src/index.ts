@@ -37,6 +37,7 @@ export type GlobalOptions = {
   memoryBench?: boolean;
   noColor: boolean;
   outputFormat?: GlobalOutputFormat;
+  trustWorkspaceHooks?: boolean;
   verbose: boolean;
 };
 

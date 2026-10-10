@@ -110,6 +110,7 @@ const globalOptions = (
     ...(values["memory-bench"] === true ? { memoryBench: true } : {}),
     noColor: values["no-color"] === true,
     ...(outputFormat ? { outputFormat } : {}),
+    ...(values["trust-workspace-hooks"] === true ? { trustWorkspaceHooks: true } : {}),
     verbose: values.verbose === true,
   };
 };

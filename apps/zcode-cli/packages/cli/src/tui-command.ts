@@ -49,6 +49,9 @@ export const runTuiCommand = async (
       options.browserUse,
       options.browserExecutable,
       workflowMode,
+      // TUI 显式 opt-in（--trust-workspace-hooks）：只影响本进程是否读取
+      // Trust store；授权本身仍由 hooks trust grant 的持久记录决定。
+      options.trustWorkspaceHooks === true,
     );
     const unregisterShutdownHandlers = registerCliShutdownHandlers({
       cleanup: async () => {
